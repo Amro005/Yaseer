@@ -1,0 +1,99 @@
+@model IEnumerable<Yaseer.Models.DisabilityType>
+@{
+    ViewData["Title"] = "إنشاء حساب";
+}
+
+<section class="form-section">
+    <div class="form-card">
+        <h1>إنشاء حساب</h1>
+        <form id="registerForm">
+            <label>اسم المستخدم</label>
+            <input class="input" id="userName" name="userName" type="text" required />
+            
+            <label class="form-label-margin-top">البريد الإلكتروني</label>
+            <input class="input" id="email" name="email" type="email" required />
+            
+            <div class="form-row form-row-margin-top">
+                <div class="col">
+                    <label>كلمة المرور</label>
+                    <input class="input" id="password" name="password" type="password" required>
+                </div>
+                <div class="col">
+                    <label>تأكيد كلمة المرور</label>
+                    <input class="input" id="confirmPassword" name="confirmPassword" type="password" required>
+                </div>
+            </div>
+            
+            <label class="form-label-margin-top">رقم الهاتف</label>
+            <input class="input" id="phoneNumber" name="phoneNumber" type="text">
+            
+            <label class="form-label-margin-top">نوع الإعاقة</label>
+            <select class="input" id="disabilityTypeId" name="disabilityTypeId">
+                <option value="">غير محدد</option>
+                @foreach (var disability in Model)
+                {
+                    <option value="@disability.Id">@disability.Name</option>
+                }
+            </select>
+            
+            <div class="form-actions-margin">
+                <button class="btn-submit" type="submit">إنشاء الحساب</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                userName: formData.get('userName'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                confirmPassword: formData.get('confirmPassword'),
+                phoneNumber: formData.get('phoneNumber'),
+                disabilityTypeId: parseInt(formData.get('disabilityTypeId'))
+            };
+
+            try {
+                const response = await fetch('@Url.Action("Register", "Account")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    Swal.fire({
+                        title: 'نجح!',
+                        text: result.message,
+                        icon: 'success',
+                        confirmButtonText: 'حسناً'
+                    }).then(() => {
+                        window.location.href = '@Url.Action("Index", "Home")';
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'خطأ!',
+                        text: result.message,
+                        icon: 'error',
+                        confirmButtonText: 'حسناً'
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: 'خطأ!',
+                    text: 'حدث خطأ غير متوقع',
+                    icon: 'error',
+                    confirmButtonText: 'حسناً'
+                });
+            }
+        });
+    </script>
+}

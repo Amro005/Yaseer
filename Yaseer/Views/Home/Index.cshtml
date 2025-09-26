@@ -1,0 +1,64 @@
+@model IEnumerable<Yaseer.Models.Clinic>
+@using System.Linq
+
+@{
+    ViewData["Title"] = "الرئيسية";
+}
+
+<section class="hero hero-overlay">
+    <div class="intro">
+        <h1>نستمع، نهتم، ونساعدك على الوصول للرعاية</h1>
+        <p>منصة Yaseer لربط المرضى بعيادات موثوقة في عمّان، الأردن — حجز سريع وتجربة مريحة.</p>
+        <div class="actions">
+            <a href="#clinics" class="btn">استكشف العيادات</a>
+            <a asp-controller="Home" asp-action="Services" class="btn secondary">اطّلع على الخدمات</a>
+        </div>
+    </div>
+    <div class="visual">
+        <img src="~/images/Home_1.jpg" alt="صورة طبيب" loading="lazy" decoding="async" width="1200" height="800" />
+    </div>
+</section>
+
+<div class="section-title">
+    <h2>عياداتنا المميزة</h2>
+    <a asp-controller="Home" asp-action="Services" class="link">عرض الكل</a>
+</div>
+
+<div class="cards-grid">
+    @foreach (var clinic in Model.Take(6))
+    {
+        <div class="card">
+            @{
+                var cardRaw = !string.IsNullOrWhiteSpace(clinic.ImageUrl) ? clinic.ImageUrl : "~/images/Home_1.jpg";
+                var cardSrc = cardRaw.StartsWith("~") ? Url.Content(cardRaw) : cardRaw;
+            }
+            <img src="@cardSrc" alt="@clinic.Name" loading="lazy" decoding="async" width="600" height="400">
+            <h3>@clinic.Name</h3>
+            <p>@clinic.Description</p>
+            <div class="meta">
+                <div>التخصص: @clinic.Specialization</div>
+                <div>@clinic.Address</div>
+            </div>
+            <div class="card-actions">
+                <a class="btn-primary btn-sm" asp-controller="Clinic" asp-action="Details" asp-route-id="@clinic.Id">عرض التفاصيل</a>
+                <a class="btn btn-icon btn-chat" href="#" aria-label="بدء الشاتبوت">
+                    <i class="fas fa-comment" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="section-title">
+    <h2 id="clinics">لقطات من الرعاية</h2>
+    <a href="#clinics" class="link">عرض المزيد</a>
+</div>
+
+<div class="hero-banner">
+    <img class="hero-banner-img" src="@Url.Content("~/images/slides/Home0_2.jpg")" alt="رعاية شاملة" loading="lazy" decoding="async" width="1400" height="520" />
+    <div class="hero-banner-caption">
+        <h3>رعاية شاملة لذوي الإعاقة</h3>
+        <p>خدمات طبية وتأهيلية مخصصة – احجز بسهولة الآن</p>
+        <a class="btn-primary" asp-controller="Home" asp-action="Services">تعرف على الخدمات</a>
+    </div>
+</div>

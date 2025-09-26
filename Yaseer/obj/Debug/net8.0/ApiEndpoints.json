@@ -1,0 +1,46 @@
+[
+  {
+    "ContainingType": "Program\u002B\u003C\u003Ec",
+    "Method": "\u003C\u003CMain\u003E$\u003Eb__0_4",
+    "RelativePath": "api/debug/send-welcome",
+    "HttpMethod": "POST",
+    "IsController": false,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "body",
+        "Type": "TokenDto",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Program\u002B\u003C\u003Ec",
+    "Method": "\u003C\u003CMain\u003E$\u003Eb__0_3",
+    "RelativePath": "api/token",
+    "HttpMethod": "POST",
+    "IsController": false,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "body",
+        "Type": "TokenDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      }
+    ]
+  }
+]

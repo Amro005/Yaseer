@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>@ViewData["Title"] - Yaseer - يسير</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<link rel="preload" as="image" href="@Url.Content("~/images/slides/Home0_2.jpg")">
+</head>
+<body>
+	<header class="header container">
+		<div class="brand">
+			<div class="logo-mark">YS</div>
+			<div class="logo-text">
+				<a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-logo-link">
+					<strong>Yaseer</strong> - يسير
+				</a>
+			</div>
+		</div>
+		<button class="nav-toggle" aria-label="القائمة">
+			<i class="fas fa-bars"></i>
+		</button>
+		<nav class="nav">
+			<a asp-area="" asp-controller="Home" asp-action="Index" class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")">الرئيسية</a>
+			<a asp-area="" asp-controller="Home" asp-action="About" class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "About" ? "active" : "")">عننا</a>
+			<a asp-area="" asp-controller="Home" asp-action="Services" class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["Action"]?.ToString() == "Services" ? "active" : "")">خدماتنا</a>
+			@if (User.Identity.IsAuthenticated)
+			{
+				<a asp-area="" asp-controller="Dashboard" asp-action="Index" class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Dashboard" ? "active" : "")">لوحة التحكم</a>
+				<a asp-controller="Account" asp-action="Profile" class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Account" && ViewContext.RouteData.Values["Action"]?.ToString() == "Profile" ? "active" : "") navbar-user-link">
+					<i class="fas fa-user"></i> مرحباً، @(User.FindFirst("UserName")?.Value ?? User.Identity.Name)
+				</a>
+			}
+			else
+			{
+				<a asp-controller="Account" asp-action="Login" class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Account" && ViewContext.RouteData.Values["Action"]?.ToString() == "Login" ? "active" : "")">تسجيل الدخول</a>
+				<a asp-controller="Account" asp-action="Register" class="btn-success btn-sm @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Account" && ViewContext.RouteData.Values["Action"]?.ToString() == "Register" ? "active" : "")">إنشاء حساب</a>
+			}
+		</nav>
+	</header>
+	<main class="container">
+		@RenderBody()
+	</main>
+
+	<footer class="footer">© 2025 Yaseer - يسير - حقوق النشر محفوظة</footer>
+
+	<a href="#" class="chat-float" aria-label="محادثة">
+		<i class="fas fa-comment"></i>
+	</a>
+
+	@* @ChatBootModal هنا الـــ@ *@
+	<div id="chatModal" class="modal" aria-hidden="true">
+		<div class="modal-dialog chat-modal">
+			<div class="modal-header">
+				<div class="chat-title">
+					<i class="fas fa-robot"></i>
+					<span>Yaseer</span>
+				</div>
+				<button type="button" class="modal-close" aria-label="إغلاق">×</button>
+			</div>
+			<div class="modal-body">
+				<div class="chat-participants">
+					<span class="me">@((User?.Identity?.IsAuthenticated ?? false) ? (User.FindFirst("UserName")?.Value ?? User.Identity.Name) : "ضيف")</span>
+					<span class="sep">•</span>
+					<span class="bot">Yaseer</span>
+				</div>
+				<div id="chatMessages" class="chat-messages" dir="rtl"></div>
+			</div>
+			<div class="modal-footer">
+				<form id="chatForm" class="chat-form" autocomplete="off">
+					<input id="chatInput" class="chat-input" type="text" placeholder="اكتب رسالتك…" />
+					<button class="chat-send" type="submit" aria-label="إرسال"><i class="fas fa-paper-plane"></i></button>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+		window.YASEER_CHAT_API_BASE = 'https://cribla-protonematoid-mildred.ngrok-free.dev';//PUBLIC_URL هنا رابط
+	</script>
+
+	<script src="~/js/site.js" asp-append-version="true"></script>
+	<script src="~/js/chat.js" asp-append-version="true"></script>
+	<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+	<!-- FCM bootstrapping: loads Firebase, registers SW, gets token, sends welcome once -->
+	<script type="module" src="~/js/fcm.js" asp-append-version="true"></script>
+
+	@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

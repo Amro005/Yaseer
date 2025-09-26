@@ -1,0 +1,88 @@
+@model Yaseer.Models.ClinicCreateRequest
+@{
+    ViewData["Title"] = "إنشاء عيادة";
+}
+
+<section class="form-section-medium">
+    <div class="form-card">
+        <h1>@(ViewBag.IsEdit == true ? "تعديل عيادة" : "إنشاء عيادة جديدة")</h1>
+        <form asp-action="@(ViewBag.IsEdit == true ? "Edit" : "Create")" asp-controller="Clinic" method="post" enctype="multipart/form-data">
+            @if (ViewBag.IsEdit == true)
+            {
+                <input type="hidden" name="id" value="@ViewBag.ClinicId" />
+            }
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <div class="form-row">
+                <div class="col">
+                    <label asp-for="Name"></label>
+                    <input asp-for="Name" class="input" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="col">
+                    <label asp-for="Specialization"></label>
+                    <input asp-for="Specialization" class="input" />
+                    <span asp-validation-for="Specialization" class="text-danger"></span>
+                </div>
+            </div>
+            
+            <div class="form-row form-row-margin-top">
+                <div class="col">
+                    <label asp-for="Address"></label>
+                    <input asp-for="Address" class="input" />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+                <div class="col">
+                    <label asp-for="PhoneNumber"></label>
+                    <input asp-for="PhoneNumber" class="input" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+            </div>
+            
+            <label asp-for="Description" class="form-label-margin-top"></label>
+            <textarea asp-for="Description" rows="3" class="input"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+            
+            <div class="form-row form-row-margin-top">
+                <div class="col">
+                    <div class="file-upload-container" data-existing-image="@((ViewBag.IsEdit == true && !string.IsNullOrWhiteSpace(Model?.ImageUrl)) ? (Model!.ImageUrl!.StartsWith("~") ? Url.Content(Model.ImageUrl) : Model.ImageUrl) : "")">
+                        <label class="file-upload-label" id="fileUploadLabel">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="upload-text">
+                                <span class="upload-title">صورة العيادة</span>
+                                <span class="upload-subtitle">اسحب الصورة هنا أو اضغط للاختيار</span>
+                            </div>
+                            <input type="file" name="imageFile" accept="image/*" class="file-upload-input" id="imageFileInput" />
+                        </label>
+                        <div class="image-preview" id="imagePreview" style="display: none;">
+                            <img id="previewImg" src="" alt="معاينة الصورة">
+                            <div class="preview-overlay">
+                                <div class="preview-actions">
+                                    <button type="button" class="change-image-btn" id="changeImageBtn">
+                                        <i class="fas fa-edit"></i>
+                                        <span>تغيير</span>
+                                    </button>
+                                    <button type="button" class="remove-image-btn" id="removeImageBtn">
+                                        <i class="fas fa-times"></i>
+                                        <span>حذف</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="file-upload-hint" id="uploadHint">اختر صورة للعيادة</span>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="form-actions-margin">
+                <button type="submit" class="btn-submit">حفظ</button>
+                <a asp-controller="Dashboard" asp-action="Index" class="btn-cancel">إلغاء</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+

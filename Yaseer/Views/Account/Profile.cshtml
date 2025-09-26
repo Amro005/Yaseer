@@ -1,0 +1,84 @@
+@{
+    ViewData["Title"] = "البروفايل";
+}
+
+<section class=" hero-center hero-margin-bottom">
+    <div class="intro">
+        <h1>البروفايل الشخصي</h1>
+        <p>إدارة معلوماتك الشخصية وإعدادات الحساب</p>
+    </div>
+</section>
+
+<div class="container container-center">
+    <div class="cards-single">
+        <div class="card">
+            <div class="profile-padding">
+                <div class="profile-header">
+                    @{ var displayName = (User.FindFirst("UserName")?.Value ?? User.Identity.Name) ?? ""; var initial = string.IsNullOrWhiteSpace(displayName) ? "؟" : displayName.Trim().Substring(0,1); }
+                    <div class="profile-avatar">@initial</div>
+                    <h2 class="profile-name">@displayName</h2>
+                    <p class="profile-date">عضو منذ @DateTime.Now.ToString("MMMM yyyy")</p>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <i class="fas fa-calendar-check profile-icon"></i>
+                        <h3 class="profile-stat-number">@ViewBag.AppointmentsCount</h3>
+                        <p class="profile-stat-text">موعد محجوز</p>
+                    </div>
+                    <div class="profile-stat success">
+                        <i class="fas fa-star profile-icon-success"></i>
+                        <h3 class="profile-stat-number-success">4.8</h3>
+                        <p class="profile-stat-text">تقييم</p>
+                    </div>
+                </div>
+
+                <div class="section-divider">
+                    <h3 class="section-title-margin">المعلومات الشخصية</h3>
+                    <div class="profile-info">
+                        <div class="profile-info-item">
+                            <span class="profile-info-label">الاسم الكامل:</span>
+                            <span>أحمد محمد السعيد</span>
+                        </div>
+                        <div class="profile-info-item">
+                            <span class="profile-info-label">البريد الإلكتروني:</span>
+                            <span>ahmed@example.com</span>
+                        </div>
+                        <div class="profile-info-item">
+                            <span class="profile-info-label">رقم الهاتف:</span>
+                            <span>+966 50 123 4567</span>
+                        </div>
+                        <div class="profile-info-item">
+                            <span class="profile-info-label">نوع الإعاقة:</span>
+                            <span>إعاقة حركية</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-actions">
+                    <button onclick="editProfile()" class="btn-primary">
+                        <i class="fas fa-edit"></i> تعديل البيانات
+                    </button>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="profile-form-inline">
+                        <button type="submit" class="btn-danger" onclick="return confirm('هل أنت متأكد من تسجيل الخروج؟')">
+                            <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editProfile() {
+            Swal.fire({
+                title: 'تعديل البيانات',
+                text: 'ميزة تعديل البيانات ستكون متاحة قريباً',
+                icon: 'info',
+                confirmButtonText: 'حسناً'
+            });
+        }
+    </script>
+}

@@ -1,0 +1,256 @@
+@model Yaseer.Models.Clinic
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<section class="detail-section clinic-detail-margin">
+    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+    {
+        <img class="detail-cover" src="@Model.ImageUrl" alt="صورة الغلاف" loading="lazy" decoding="async" width="1280" height="480">
+    }
+    else
+    {
+        <img class="detail-cover" src="~/images/Home_1.jpg" alt="صورة الغلاف" loading="lazy" decoding="async" width="1280" height="480">
+    }
+
+    <div class="detail-grid">
+        <div class="booking-card detail-content">
+            <h1>@Model.Name</h1>
+            <p class="small">@Model.Description</p>
+
+            <div class="clinic-badges-container">
+                <span class="ok-badge">خدمة موثوقة</span>
+                <span class="ok-badge">تأهيل متخصص</span>
+                <span class="ok-badge">طاقم معتمد</span>
+            </div>
+
+            <div class="clinic-info-margin info-grid">
+                <div class="info-row"><strong>العنوان</strong><span>@Model.Address</span></div>
+                <div class="info-row"><strong>التخصص</strong><span>@Model.Specialization</span></div>
+                @if (!string.IsNullOrEmpty(Model.PhoneNumber))
+                {
+                    <div class="info-row"><strong>الهاتف</strong><span>@Model.PhoneNumber</span></div>
+                }
+                <div class="info-row"><strong>أوقات العمل</strong><span>السبت - الخميس: 8 صباحاً - 8 مساءً</span></div>
+            </div>
+
+            <div class="clinic-about-margin card">
+                <h3 class="clinic-about-title">عن العيادة</h3>
+                <p class="small">تأسس المركز لتقديم رعاية مهنية متخصصة بالتركيز على علاج الإصابات الحركية وإعادة التأهيل بعد العمليات. نوفر خطة علاجية مخصصة لكل مريض مع متابعة دورية وتقييم تقدم الحالة.</p>
+            </div>
+        </div>
+
+        <aside>
+            <div class="booking-card">
+                <h3 class="clinic-booking-title">حجز موعد</h3>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <form id="appointmentForm">
+                        <input type="hidden" id="clinicId" value="@Model.Id">
+                        
+                        <label>التاريخ</label>
+                        <input class="input" type="text" id="appointmentDate" name="appointmentDate" required>
+                        
+                        <div class="form-row form-row-margin">
+                            <div class="col">
+                                <label>من</label>
+                                <input class="input" type="text" id="appointmentTime" name="appointmentTime" required>
+                            </div>
+                            <div class="col">
+                                <label>إلى</label>
+                                <input class="input" type="text" id="appointmentEndTime" name="appointmentEndTime" required>
+                            </div>
+                        </div>
+                        
+                        <label class="form-label-margin">الملاحظات (اختياري)</label>
+                        <textarea class="input" id="notes" name="notes" rows="3"></textarea>
+                        
+                    <div class="form-actions-container">
+                        <button type="button" id="checkBtn" class="btn-info">فحص التوفر</button>
+                        <a href="#" class="btn-secondary">اتصال بالعيادة</a>
+                    </div>
+                    </form>
+                }
+                else
+                {
+                    <div class="login-prompt-container">
+                        <i class="fas fa-lock login-prompt-icon"></i>
+                        <p>يجب تسجيل الدخول لحجز موعد</p>
+                    <div class="login-prompt-actions">
+                        <a asp-controller="Account" asp-action="Login" class="btn-primary">تسجيل الدخول</a>
+                        <a asp-controller="Account" asp-action="Register" class="btn-secondary">إنشاء حساب</a>
+                    </div>
+                    </div>
+                }
+            </div>
+        </aside>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        const dateInput = document.getElementById('appointmentDate');
+        const timeInput = document.getElementById('appointmentTime');
+        const clinicId = document.getElementById('clinicId').value;
+        const clinicName = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Name));
+        const timeEndInput = document.getElementById('appointmentEndTime');
+        let availableTimes = [];
+
+        const datePicker = flatpickr("#appointmentDate", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            defaultDate: "today",
+            disable: [
+                function(date) { return (date.getDay() === 5); }
+            ],
+            onReady: async function() {
+                const evt = new Event('change');
+                dateInput.dispatchEvent(evt);
+            }
+        });
+
+        const timePicker = flatpickr("#appointmentTime", {
+            noCalendar: true,
+            enableTime: true,
+            time_24hr: true,
+            minuteIncrement: 30,
+            defaultHour: 9,
+            defaultMinute: 0
+        });
+
+        const timeEndPicker = flatpickr("#appointmentEndTime", {
+            noCalendar: true,
+            enableTime: true,
+            time_24hr: true,
+            minuteIncrement: 30,
+            defaultHour: 9,
+            defaultMinute: 30
+        });
+
+        async function loadAvailableTimes(date) {
+            try {
+                const response = await fetch(`@Url.Action("GetAvailableTimes", "Clinic")?clinicId=${clinicId}&date=${date}`);
+                availableTimes = await response.json();
+                if (timeInput.value && !availableTimes.includes(timeInput.value)) {
+                    timeInput.value = '';
+                }
+            } catch (e) {
+                console.error(e);
+                availableTimes = [];
+            }
+        }
+
+        dateInput.addEventListener('change', async function() {
+            const date = this.value;
+            if (!date) return;
+            await loadAvailableTimes(date);
+        });
+
+        timeInput.addEventListener('change', function(){});
+        timeEndInput.addEventListener('change', function(){});
+
+        document.getElementById('checkBtn').addEventListener('click', async function() {
+            const date = dateInput.value;
+            const time = timeInput.value;
+            if (!date || !time) {
+                Swal.fire({ title: 'بيانات ناقصة', text: 'يرجى اختيار التاريخ والوقت', icon: 'warning', confirmButtonText: 'حسناً' });
+                return;
+            }
+
+            try {
+                const response = await fetch('@Url.Action("CheckAvailability","Clinic")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ clinicId: parseInt(clinicId), appointmentDate: date, appointmentTime: time, appointmentEndTime: timeEndInput.value })
+                });
+                const result = await response.json();
+                if (result.available) {
+                    const details = `${clinicName} | ${date} ${time} - ${timeEndInput.value}`;
+                    const needTransport = await Swal.fire({
+                        title: 'الوقت متاح',
+                        text: `${details}\nهل تحتاج خدمة نقل؟`,
+                        icon: 'success',
+                        showDenyButton: true,
+                        showCancelButton: true,
+                        confirmButtonText: 'نعم، أحتاج نقل',
+                        denyButtonText: 'لا أحتاج',
+                        cancelButtonText: 'إلغاء'
+                    });
+                    if (needTransport.isConfirmed) {
+                        const addr = await Swal.fire({
+                            title: 'عنوان الالتقاط',
+                            input: 'text',
+                            inputPlaceholder: 'مثال: عمان - تلاع العلي - شارع...',
+                            inputAttributes: { 'aria-label': 'عنوان الالتقاط' },
+                            showCancelButton: true,
+                            confirmButtonText: 'متابعة',
+                            cancelButtonText: 'إلغاء'
+                        });
+                        if (addr.isConfirmed) {
+                            await bookNow({
+                                clinicId: parseInt(clinicId),
+                                appointmentDate: date,
+                                appointmentTime: time,
+                                appointmentEndTime: timeEndInput.value,
+                                needsTransport: true,
+                                transportAddress: addr.value || '',
+                                notes: document.getElementById('notes').value
+                            });
+                        }
+                    } else if (needTransport.isDenied) {
+                        await bookNow({
+                            clinicId: parseInt(clinicId),
+                            appointmentDate: date,
+                            appointmentTime: time,
+                            appointmentEndTime: timeEndInput.value,
+                            needsTransport: false,
+                            transportAddress: '',
+                            notes: document.getElementById('notes').value
+                        });
+                    }
+                } else {
+                    Swal.fire({ title: 'الوقت غير متاح', text: 'يرجى اختيار وقت آخر.', icon: 'error', confirmButtonText: 'حسناً' });
+                }
+            } catch (e) {
+                Swal.fire({ title: 'خطأ', text: 'تعذر فحص التوفر حالياً', icon: 'error', confirmButtonText: 'حسناً' });
+            }
+        });
+
+        async function bookNow(data){
+            try {
+                const response = await fetch('@Url.Action("BookAppointment", "Clinic")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const contentType = response.headers.get('content-type') || '';
+                if (!response.ok || !contentType.includes('application/json')) {
+                    if (response.status === 401) {
+                        Swal.fire({ title: 'يجب تسجيل الدخول', text: 'يرجى تسجيل الدخول لإتمام الحجز.', icon: 'warning', confirmButtonText: 'تسجيل الدخول' })
+                            .then(() => { window.location.href = '@Url.Action("Login","Account")'; });
+                        return;
+                    }
+                    Swal.fire({ title: 'خطأ', text: 'تعذر إتمام الحجز حالياً.', icon: 'error', confirmButtonText: 'حسناً' });
+                    return;
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    const details = `${clinicName} | ${data.appointmentDate} ${data.appointmentTime} - ${data.appointmentEndTime}`;
+                    Swal.fire({ title: 'تم الحجز بنجاح', text: details, icon: 'success', confirmButtonText: 'حسناً' })
+                        .then(() => {
+                            document.getElementById('appointmentForm').reset();
+                            timeInput.value = '';
+                            timeEndInput.value = '';
+                            loadAvailableTimes(dateInput.value);
+                        });
+                } else {
+                    Swal.fire({ title: 'فشل الحجز', text: result.message, icon: 'error', confirmButtonText: 'حسناً' });
+                }
+            } catch (error) {
+                Swal.fire({ title: 'خطأ غير متوقع', text: 'يرجى المحاولة لاحقاً.', icon: 'error', confirmButtonText: 'حسناً' });
+            }
+        }
+    </script>
+}

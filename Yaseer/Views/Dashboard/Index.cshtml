@@ -1,0 +1,387 @@
+@{
+    ViewData["Title"] = "لوحة التحكم";
+}
+<div class="dashboard dashboard-layout">
+    <div class="dash-content">
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">لوحة التحكم</h1>
+                <p class="dashboard-subtitle">مرحباً بك في لوحة التحكم</p>
+            </div>
+            <div class="dashboard-actions">
+                <a class="btn-primary" asp-controller="Clinic" asp-action="Create">
+                    <i class="fas fa-plus"></i> إنشاء عيادة جديدة
+                </a>
+                <a class="btn-success" href="#appointments">
+                    <i class="fas fa-calendar"></i> إدارة المواعيد
+                </a>
+            </div>
+        </div>
+        <div class="dashboard-cards">
+            <div class="stat-card stat-primary">
+                <div class="stat-inner">
+                    <div>
+                        <h3 class="stat-title">إجمالي المستخدمين</h3>
+                        <h2 class="stat-number">@ViewBag.TotalUsers</h2>
+                    </div>
+                    <div>
+                        <i class="fas fa-users stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card stat-success">
+                <div class="stat-inner">
+                    <div>
+                        <h3 class="stat-title">إجمالي الحجوزات</h3>
+                        <h2 class="stat-number">@ViewBag.TotalAppointments</h2>
+                    </div>
+                    <div>
+                        <i class="fas fa-calendar-check stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card stat-info">
+                <div class="stat-inner">
+                    <div>
+                        <h3 class="stat-title">إجمالي العيادات</h3>
+                        <h2 class="stat-number">@ViewBag.TotalClinics</h2>
+                    </div>
+                    <div>
+                        <i class="fas fa-hospital stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="dash-tabs">
+            <a href="#" data-target="tab-appointments" class="dash-link active"><i class="fas fa-calendar"></i> الحجوزات</a>
+            <a href="#" data-target="tab-clinics" class="dash-link"><i class="fas fa-hospital"></i> العيادات</a>
+        </nav>
+        <div class="dashboard-content">
+            <div id="tab-appointments" class="dashboard-section tab-panel active">
+                <div class="section-bar">
+                    <h2 id="appointments">إدارة المواعيد</h2>
+                    <div class="section-actions">
+                    </div>
+                </div>
+
+                <div class="card-block">
+                    <div class="card-head">
+                        <h3>آخر الحجوزات</h3>
+                    </div>
+                    <div class="card-body">
+                        @if (ViewBag.RecentAppointments != null && ViewBag.RecentAppointments.Count > 0)
+                        {
+                            <div class="table-wrap">
+                                <table class="dash-table">
+                                    <thead>
+                                        <tr>
+                                            <th>المريض (لا سمح الله)</th>
+                                            <th>العيادة</th>
+                                            <th>التاريخ</th>
+                                            <th>الوقت</th>
+                                            <th>النقل</th>
+                                            <th>الحالة</th>
+                                            <th class="center">الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var appointment in ViewBag.RecentAppointments)
+                                        {
+                                            <tr>
+                                                <td>@appointment.User.FullName</td>
+                                                <td>@appointment.Clinic.Name</td>
+                                                <td>@appointment.AppointmentDate.ToString("yyyy-MM-dd")</td>
+                                                <td>@appointment.AppointmentTime.ToString(@"hh\:mm") - @appointment.AppointmentEndTime.ToString(@"hh\:mm")</td>
+                                                <td>
+                                                    @if (appointment.NeedsTransport)
+                                                    {
+                                                        <span class="transport-badge" title="@appointment.TransportAddress">
+                                                            <i class="fas fa-car"></i> مطلوب
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="no-transport-badge">
+                                                            <i class="fas fa-walking"></i> غير مطلوب
+                                                        </span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (appointment.IsConfirmed)
+                                                    {
+                                                        <span class="ok-badge">مؤكد</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge-warning">في الانتظار</span>
+                                                    }
+                                                </td>
+                                                <td class="center">
+                                                    <div class="inline-actions">
+                                                        <button onclick="editAppointment(@appointment.Id)" class="btn-action btn-xs">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                        <button onclick="deleteAppointment(@appointment.Id)" class="btn-action-danger btn-xs">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="muted-center">لا توجد حجوزات حالياً</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-clinics" class="dashboard-section tab-panel">
+                <div class="section-bar">
+                    <h2>إدارة العيادات</h2>
+                    <div class="section-actions">
+                        <a class="btn-primary btn-sm" asp-controller="Clinic" asp-action="Create">
+                            <i class="fas fa-plus"></i> إضافة عيادة جديدة
+                        </a>
+
+                    </div>
+                </div>
+
+                <div class="card-block">
+                    <div class="card-head">
+                        <h3>قائمة العيادات</h3>
+                    </div>
+                    <div class="card-body">
+                        @if (ViewBag.Clinics != null && ViewBag.Clinics.Count > 0)
+                        {
+                            <div class="table-wrap">
+                                <table class="dash-table">
+                                    <thead>
+                                        <tr>
+                                            <th>اسم العيادة</th>
+                                            <th>التخصص</th>
+                                            <th>العنوان</th>
+                                            <th>الهاتف</th>
+                                            <th class="center">الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var clinic in ViewBag.Clinics)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="clinic-item">
+                                                        @if (!string.IsNullOrEmpty(clinic.ImageUrl))
+                                                        {
+                                                            <img src="@clinic.ImageUrl" alt="@clinic.Name" class="clinic-avatar">
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="clinic-initial">
+                                                                @clinic.Name.Substring(0, 1)
+                                                            </div>
+                                                        }
+                                                        <span class="clinic-name">@clinic.Name</span>
+                                                    </div>
+                                                </td>
+                                                <td>@clinic.Specialization</td>
+                                                <td>@clinic.Address</td>
+                                                <td>@clinic.PhoneNumber</td>
+                                                <td class="center">
+                                                    <div class="inline-actions">
+                                                        <a asp-controller="Clinic" asp-action="Details" asp-route-id="@clinic.Id" class="btn-action-success btn-xs">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        <a asp-controller="Clinic" asp-action="Edit" asp-route-id="@clinic.Id" class="btn-action btn-xs">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <button onclick="deleteClinic(@clinic.Id)" class="btn-action-danger btn-xs">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="muted-center">لا توجد عيادات حالياً</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+        (function(){
+            const links = document.querySelectorAll('.dash-link');
+            const panels = document.querySelectorAll('.tab-panel');
+            links.forEach(l => l.addEventListener('click', function(e){
+                e.preventDefault();
+                links.forEach(a => a.classList.remove('active'));
+                this.classList.add('active');
+                const t = this.getAttribute('data-target');
+                panels.forEach(p => p.classList.toggle('active', p.id === t));
+            }));
+        })();
+
+        function editAppointment(appointmentId) {
+            Swal.fire({
+                title: 'تعديل الموعد',
+                text: 'هل تريد تعديل هذا الموعد؟',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، تعديل',
+                cancelButtonText: 'إلغاء',
+                confirmButtonColor: '#06b6d4',
+                cancelButtonColor: '#6b7280'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'قريباً',
+                        text: 'ميزة التعديل ستكون متاحة قريباً',
+                        icon: 'info',
+                        confirmButtonText: 'حسناً'
+                    });
+                }
+            });
+        }
+
+        function deleteAppointment(appointmentId) {
+            Swal.fire({
+                title: 'حذف الموعد',
+                text: 'هل أنت متأكد من حذف هذا الموعد؟ لا يمكن التراجع عن هذا الإجراء.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، احذف',
+                cancelButtonText: 'إلغاء',
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6b7280'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/Dashboard/DeleteAppointment/${appointmentId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'تم الحذف!',
+                                text: data.message,
+                                icon: 'success',
+                                confirmButtonText: 'حسناً'
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'خطأ!',
+                                text: data.message,
+                                icon: 'error',
+                                confirmButtonText: 'حسناً'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            title: 'خطأ!',
+                            text: 'حدث خطأ أثناء حذف الموعد',
+                            icon: 'error',
+                            confirmButtonText: 'حسناً'
+                        });
+                    });
+                }
+            });
+        }
+
+        function editClinic(clinicId) {
+            Swal.fire({
+                title: 'تعديل العيادة',
+                text: 'هل تريد تعديل هذه العيادة؟',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، تعديل',
+                cancelButtonText: 'إلغاء',
+                confirmButtonColor: '#06b6d4',
+                cancelButtonColor: '#6b7280'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'قريباً',
+                        text: 'ميزة التعديل ستكون متاحة قريباً',
+                        icon: 'info',
+                        confirmButtonText: 'حسناً'
+                    });
+                }
+            });
+        }
+
+        function deleteClinic(clinicId) {
+            Swal.fire({
+                title: 'حذف العيادة',
+                text: 'هل أنت متأكد من حذف هذه العيادة؟ لا يمكن التراجع عن هذا الإجراء.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، احذف',
+                cancelButtonText: 'إلغاء',
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6b7280'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/Dashboard/DeleteClinic/${clinicId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'تم الحذف!',
+                                text: data.message,
+                                icon: 'success',
+                                confirmButtonText: 'حسناً'
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'خطأ!',
+                                text: data.message,
+                                icon: 'error',
+                                confirmButtonText: 'حسناً'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            title: 'خطأ!',
+                            text: 'حدث خطأ أثناء حذف العيادة',
+                            icon: 'error',
+                            confirmButtonText: 'حسناً'
+                        });
+                    });
+                }
+            });
+        }
+    </script>
+}

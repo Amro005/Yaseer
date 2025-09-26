@@ -1,0 +1,72 @@
+@{
+    ViewData["Title"] = "تسجيل الدخول";
+}
+
+<section class="form-section-small">
+    <div class="form-card">
+        <h1>تسجيل الدخول</h1>
+        <form id="loginForm">
+            <label>البريد الإلكتروني</label>
+            <input class="input" type="email" id="email" name="email" required>
+            
+            <label class="form-label-margin-top">كلمة المرور</label>
+            <input class="input" type="password" id="password" name="password" required>
+            
+            <div class="form-actions-margin">
+                <button class="btn-submit" type="submit">تسجيل الدخول</button>
+                <a class="link" asp-action="Register">لا تملك حساباً؟ إنشاء حساب</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                email: formData.get('email'),
+                password: formData.get('password')
+            };
+
+            try {
+                const response = await fetch('@Url.Action("Login", "Account")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    Swal.fire({
+                        title: 'نجح!',
+                        text: result.message,
+                        icon: 'success',
+                        confirmButtonText: 'حسناً'
+                    }).then(() => {
+                        window.location.href = '@Url.Action("Index", "Home")';
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'خطأ!',
+                        text: result.message,
+                        icon: 'error',
+                        confirmButtonText: 'حسناً'
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    title: 'خطأ!',
+                    text: 'حدث خطأ غير متوقع',
+                    icon: 'error',
+                    confirmButtonText: 'حسناً'
+                });
+            }
+        });
+    </script>
+}
